@@ -1,26 +1,19 @@
-//----------------------------------------------------------------------------//
-// -*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-  //
-//                                                                            //
-// wizard.cxx                                                                 //
-//                                                                            //
-// *-,_,-*'^^'*-,_,-*'^^'*-,_,-*'^^'*-,_,-*'^^'*-,_,-*'^^'*-,_,-*'^^'*-,_,-*  //
-//                                                                            //
-// Copyright (c) 2016 Joe Glancy.                                             //
-//                                                                            //
-// This program is free software: you can redistribute it and/or modify       //
-// it under the terms of the GNU General Public License as published by       //
-// the Free Software Foundation, either version 3 of the License, or          //
-// (at your option) any later version.                                        //
-//                                                                            //
-// This program is distributed in the hope that it will be useful,            //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of             //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              //
-// GNU General Public License for more details.                               //
-//                                                                            //
-// You should have received a copy of the GNU General Public License          //
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.      //
-//                                                                            //
-//----------------------------------------------------------------------------//
+// wizard
+//
+// Copyright (c) 2016, 2020 Joe Glancy
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _XOPEN_SOURCE
 #include <arpa/inet.h>
@@ -42,9 +35,7 @@
 #include <time.h>
 #include <unistd.h>
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// constants:
 
 #define PROGRAM_NAME                        "wizard"
 #define PROGRAM_VERSION_STR                 "0.1.0"
@@ -53,9 +44,7 @@
 
 #define NL_BUFLEN                           8192
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// enums:
 
 enum {
     GIP4_VAL = 0x47495034, // "GIP4" (get IPv4 address)
@@ -75,9 +64,7 @@ typedef enum {
     COLOR_MODE_NEVER
 } color_mode_t;
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// colored output related stuff:
 
 static const char *const color_table_color[] = {
     "\033[0m",
@@ -96,17 +83,13 @@ static char *appname                        = nullptr;
 
 #define C(n) config->color_output ? color_table_color[n] : color_table_nocolor[n]
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// output/debugging macros:
 
 #define info(a, b...)  if (config->verbose) fprintf(stderr, "%sinfo%s[%u][%s:%u]: " a, C(C_GRN), C(C_RST), (unsigned) getpid(), __FUNCTION__, __LINE__, ##b)
 #define error(a, b...) if (!config->quiet)  fprintf(stderr, "%serror%s[%u][%s:%u]: " a, C(C_RED), C(C_RST), (unsigned) getpid(), __FUNCTION__, __LINE__, ##b)
 #define perror(func)   error(func "(): %s", strerror(errno))
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// classes/structures
 
 struct config
 {
@@ -182,10 +165,9 @@ struct netlink_msg
     char attrbuf[1024];
 } __attribute__((packed));
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// utility functions
 
+// function wrapping strtol
 int
 strtol(struct config *config,
        char *s,
@@ -217,9 +199,7 @@ get_page_size(void)
     return l <= 0 ? 4096 : (size_t) l;
 }
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// utility function to get the IP for a local interface
 
 static int
 get_local_ip(struct config *config,
@@ -378,9 +358,7 @@ end:
     return 0;
 }
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// core functions
 
 static int
 get_ip_4(struct config *config,
@@ -592,10 +570,6 @@ err:
     return -1;
 }
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
-
 static int
 do_get_ip_4(struct config *config)
 {
@@ -657,9 +631,7 @@ do_serve_ip_4(struct config *config)
     return serve_ip_4(config, ip);
 }
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
+// main functions
 
 #define usage_short(retcode) usage(retcode, false);
 
@@ -714,10 +686,6 @@ version(void)
     exit(0);
 }
 
-//------------------------------------------------------------------------------
-// _,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,__,-*'^'*-,_
-//------------------------------------------------------------------------------
-
 extern "C" int
 main(int argc,
      char **argv)
@@ -756,6 +724,7 @@ main(int argc,
                 usage_short(1);
             }
         }
+            break;
         case 's': // act in server mode instead of client mode
             config->server = true;
             break;
@@ -773,6 +742,7 @@ main(int argc,
             }
             config->server_port = (uint16_t) l;
         }
+            break;
         case 'd': { // delay between broadcasts
             long l;
             if (strtol(config, optarg, &l) < 0) {
@@ -785,6 +755,7 @@ main(int argc,
             }
             config->broadcast_delay = (unsigned) l;
         }
+            break;
         case 'n': { // number of times to re-broadcast before failing
             long l;
             if (strtol(config, optarg, &l) < 0) {
@@ -800,8 +771,10 @@ main(int argc,
             }
             config->get_ip_retries = (int) l;
         }
+            break;
         default:
             usage_short(1);
+            break;
         }
     }
 
